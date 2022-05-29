@@ -1,0 +1,63 @@
+*.class
+
+#project
+.project
+.classpath
+.settings/
+.metadata
+.versionsBackup
+*.iml
+.idea/
+
+# svn
+.svn/
+
+# web
+classes/
+
+# maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# Package Files #
+*.jar
+*.war
+*.ear
+
+# other
+*.tmp
+*.bak
+# 忽略ctg缓存的本地暂存文件
+snap.now
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+
+#rebel
+rebel.xml
+
+#checkstyle
+.checkstyle
+
+#__RSA_PAIR.txt
+__RSA_PAIR.txt
+order-dataservice/src/main/java/ordcenter/dataservice/order/dto/SaleOrderDTO.java
+
+*/bin/*
+
+# pycharm
+venv/
+dist/
+bin/
+build/
+*.egg-info/
