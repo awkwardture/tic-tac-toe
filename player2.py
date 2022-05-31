@@ -5,13 +5,9 @@
     player2 = Player2(BroadClass(name="player2", mark="O"))
     player2.start()
 """
-
-from concurrent.futures import ThreadPoolExecutor
+import _thread
 from socket import socket, AF_INET, SOCK_STREAM
-from time import sleep
-from tkinter import NORMAL
 
-from constant import *
 from gameboard import BoardClass
 
 
@@ -24,32 +20,25 @@ class Player2:
 
         :param board: use to record game statics,such as palyers name,move position,win/tie/loose number and so on
         """
-        self.name = "player2"
-        self.player1 = ""
         self.mark = "O"
         self.player1Mark = "X"
-        self.thread_pool = ThreadPoolExecutor(3)
-        self.conn = None
-        self.board = self.Player2Window(parent=self)
+        self.board = BoardClass(mark=self.mark)
+        _thread.start_new_thread(self.start, ())
         self.board.show()
 
-    def start(self, host, port) -> None:
+    def start(self) -> None:
 
         s = socket(AF_INET, SOCK_STREAM)
-        s.bind((host, port))
+        s.bind((self.board.host, self.board.port))
         s.listen(128)
-        self.board.fireGevent(type=UPDATEGAMESBOARD, args={'status': STARTED})
         res = ""
         while True:
             conn, addr = s.accept()
-            self.conn = conn
-            self.board.fireGevent(type=UPDATEGAMESBOARD, args={'status': NEWCONN})
+            self.board.setClient(conn)
             while True:
                 try:
-                    data = conn.recv(1024)
-                    datastr = data.decode("utf-8")
+                    datastr = conn.recv(1024).decode()
                     print('recive:', datastr)
-                    self.board.fireGevent(type=UPDATEGAMESBOARD, args={'status': 'recive:%s' % datastr})
                     res = self.dealRequest(datastr, conn)
                     if res == "Fun Times":
                         break
@@ -60,7 +49,6 @@ class Player2:
             if res == "Fun Times":
                 break
         s.close()
-        sleep(10)
         self.board.quit()
 
     def dealRequest(self, data: str, conn: socket) -> str:
@@ -68,64 +56,44 @@ class Player2:
         cmd = kv[0]
         val = kv[1]
         if cmd == "Name":
-            self.player1 = val
-            self.board.fireGevent(type=SETPLAYERSNAME,
-                                  args={'name': self.name})
-            cmd = "Name,%s" % self.name
+            self.board.player1 = val
+            cmd = "Name,%s" % self.board.player2
             conn.send(cmd.encode('utf-8'))
-            self.board.fireGevent(type=UPDATEGAMESBOARD, args={'status': P2WAITING})
         elif cmd == "Move":
-            self.board.fireGevent(type=UPDATEGAMESBOARD,
-                                  args={'status': PLAYING, 'isbt': True, 'index': int(val), 'mark': self.player1Mark})
-            self.board.setLastplayer(self.player1)
+            if val == "1":
+                self.board.updateGamesBoard(self.board.btn1, self.player1Mark, self.board.player1)
+            elif val == "2":
+                self.board.updateGamesBoard(self.board.btn2, self.player1Mark, self.board.player1)
+            elif val == "3":
+                self.board.updateGamesBoard(self.board.btn3, self.player1Mark, self.board.player1)
+            elif val == "4":
+                self.board.updateGamesBoard(self.board.btn4, self.player1Mark, self.board.player1)
+            elif val == "5":
+                self.board.updateGamesBoard(self.board.btn5, self.player1Mark, self.board.player1)
+            elif val == "6":
+                self.board.updateGamesBoard(self.board.btn6, self.player1Mark, self.board.player1)
+            elif val == "7":
+                self.board.updateGamesBoard(self.board.btn7, self.player1Mark, self.board.player1)
+            elif val == "8":
+                self.board.updateGamesBoard(self.board.btn8, self.player1Mark, self.board.player1)
+            elif val == "9":
+                self.board.updateGamesBoard(self.board.btn9, self.player1Mark, self.board.player1)
         elif cmd == "Play Again":
-            self.updGameResult(val)
-            self.board.printStats()
+            self.board.computeStats(val, False)
             self.board.resetGameBoard()
         elif cmd == "Fun Times":
-            self.updGameResult(val)
-            self.board.printStats()
+            self.board.computeStats(val, False)
+            self.board.quit()
         return cmd
-
-    def sendCmd(self, cmd):
-        self.conn.send(cmd.encode('utf-8'))
-        self.board.setLastplayer(self.name)
-        self.board.fireGevent(type=UPDATEGAMESBOARD, args={'status': P2WAITING})
 
     def dealError(self, e) -> None:
         errmsg = 'OS error!%s' % e
         print(errmsg)
-        self.board.fireGevent(type=UPDATEGAMESBOARD, args={'status': errmsg})
         self.board.resetGameBoard()
-        self.board.updError()
-
-    def updGameResult(self, val):
-        if val == "win":
-            self.board.updLooses()
-        elif val == "tie":
-            self.board.updTies()
-        elif val == "loose":
-            self.board.updWins()
-
-    class Player2Window(BoardClass):
-
-        def __init__(self, who: int = 2, parent=None) -> None:
-            super().__init__(mark="O", who=who, parent=parent)
-
-        def startPlayer2(self) -> None:
-            try:
-                self.parent.start(self.getHost(), int(self.getPort()))
-            except OSError as e:
-                self.parent.dealError(e)
-                self.buttonServ.configure(state=NORMAL)
-
-        def startPlayer1(self) -> None:
-            pass
 
 
 def main() -> None:
     player2 = Player2()
-    # player2.start()
 
 
 if __name__ == '__main__':
