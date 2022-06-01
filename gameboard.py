@@ -153,7 +153,7 @@ class BoardClass:
     def doSend(self, msg, btn):
         if self.mark == "X":
             if self.lastplayer != self.player1:
-                self.updLastplayer(self.player1,True)
+                self.updLastplayer(self.player1)
                 btn['text'] = self.mark
                 btn['state'] = DISABLED
                 result = self.gameResult(self.mark)
@@ -163,7 +163,7 @@ class BoardClass:
                     self.replay(result)
         if self.mark == "O":
             if self.lastplayer == self.player1:
-                self.updLastplayer(self.player2,True)
+                self.updLastplayer(self.player2)
                 btn['text'] = self.mark
                 btn['state'] = DISABLED
                 self.client.send(msg.encode())
@@ -171,7 +171,7 @@ class BoardClass:
     def updateGamesBoard(self, btn, mark, player) -> None:
         btn['text'] = mark
         btn['state'] = DISABLED
-        self.updLastplayer(player,False)
+        self.updLastplayer(player)
         if self.mark == "X":
             result = self.gameResult(mark)
             if mark == "O":
@@ -193,19 +193,14 @@ class BoardClass:
             self.computeStats(data, True)
             self.quit()
 
-    def updLastplayer(self, player,send) -> None:
+    def updLastplayer(self, player) -> None:
         self.lastplayer = player
         self.labelLastPlayer['text'] = "lastplayer:%s" % self.lastplayer
-        if send:
-            if self.mark == "X":
-                self.labelturn['text'] = "who's trun:%s" % self.player2
-            else:
-                self.labelturn['text'] = "who's trun:%s" % self.player1
+        if self.lastplayer == self.player1:
+            self.labelturn['text'] = "who's trun:%s" % self.player2
         else:
-            if self.mark == "X":
-                self.labelturn['text'] = "who's trun:%s" % self.player1
-            else:
-                self.labelturn['text'] = "who's trun:%s" % self.player2
+            self.labelturn['text'] = "who's trun:%s" % self.player1
+
 
     def updWins(self) -> None:
         self.wins += 1
